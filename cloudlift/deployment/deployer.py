@@ -5,13 +5,17 @@ from pprint import pformat
 from time import sleep, time
 
 import boto3
-from cloudlift.config import ParameterStore, secrets_manager
-from cloudlift.config.logging import (log, log_bold, log_err, log_intent,
-                                      log_warning, log_with_color)
-from cloudlift.deployment.ecs import DeployAction, EcsClient, EcsTaskDefinition
+from deepdiff import DeepDiff
+
+from cloudlift.config import ParameterStore
+from cloudlift.config import secrets_manager
+from cloudlift.config.logging import log_bold, log_err, log_intent, log_with_color, log_warning, log
+from cloudlift.deployment.ecs import DeployAction
+from cloudlift.deployment.ecs import EcsClient
+from cloudlift.deployment.ecs import EcsTaskDefinition
 from cloudlift.deployment.task_definition_builder import TaskDefinitionBuilder
 from cloudlift.exceptions import UnrecoverableException
-from deepdiff import DeepDiff
+
 
 
 def find_essential_container(container_definitions):

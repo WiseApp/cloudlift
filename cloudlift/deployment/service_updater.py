@@ -3,14 +3,14 @@ import os
 from time import sleep
 
 import boto3
-from cloudlift.config import (ServiceConfiguration, get_account_id,
-                              get_cluster_name, get_region_for_environment)
+
+from cloudlift.config import get_account_id, get_cluster_name, \
+    ServiceConfiguration, get_region_for_environment
 from cloudlift.config.logging import log_bold, log_intent, log_warning
-from cloudlift.deployment import ServiceInformationFetcher, deployer
-from cloudlift.deployment.ecr import ECR
-from cloudlift.deployment.ecs import EcsClient
+from cloudlift.deployment import deployer, ServiceInformationFetcher
 from cloudlift.exceptions import UnrecoverableException
 from cloudlift.utils import chunks
+from cloudlift.deployment.ecr import ECR
 from stringcase import spinalcase
 
 DEPLOYMENT_COLORS = ['blue', 'magenta', 'white', 'cyan']
