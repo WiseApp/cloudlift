@@ -5,16 +5,13 @@ from pprint import pformat
 from time import sleep, time
 
 import boto3
-from deepdiff import DeepDiff
-
-from cloudlift.config import ParameterStore
-from cloudlift.config import secrets_manager
-from cloudlift.config.logging import log_bold, log_err, log_intent, log_with_color, log_warning, log
-from cloudlift.deployment.ecs import DeployAction
-from cloudlift.deployment.ecs import EcsTaskDefinition
+from cloudlift.config import ParameterStore, secrets_manager
+from cloudlift.config.logging import (log, log_bold, log_err, log_intent,
+                                      log_warning, log_with_color)
+from cloudlift.deployment.ecs import DeployAction, EcsClient, EcsTaskDefinition
 from cloudlift.deployment.task_definition_builder import TaskDefinitionBuilder
 from cloudlift.exceptions import UnrecoverableException
-
+from deepdiff import DeepDiff
 
 
 def find_essential_container(container_definitions):
@@ -24,17 +21,19 @@ def find_essential_container(container_definitions):
     raise UnrecoverableException('no essential containers found')
 
 
-def revert_deployment(client, cluster_name, ecs_service_name, color, timeout_seconds, deployment_identifier, **kwargs):
+def revert_deployment(cluster_name, ecs_service_name, color, timeout_seconds, deployment_identifier, region, **kwargs):
+    client = EcsClient(None, None, region)
     deployment = DeployAction(client, cluster_name, ecs_service_name)
     previous_task_defn = deployment.get_task_definition_by_deployment_identifier(deployment.service,
                                                                                  deployment_identifier)
     deploy_task_definition(client, previous_task_defn, cluster_name, ecs_service_name, color, timeout_seconds, 'Revert')
 
 
-def deploy_new_version(client, cluster_name, ecs_service_name, ecs_service_logical_name, deployment_identifier,
+def deploy_new_version(cluster_name, ecs_service_name, ecs_service_logical_name, deployment_identifier,
                        service_name, sample_env_file_path,
                        timeout_seconds, env_name, secrets_name, service_configuration, region, ecr_image_uri,
                        color='white'):
+    client = EcsClient(None, None, region)
     task_definition = create_new_task_definition(
         color=color,
         ecr_image_uri=ecr_image_uri,

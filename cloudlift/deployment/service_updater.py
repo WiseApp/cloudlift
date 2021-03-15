@@ -3,15 +3,14 @@ import os
 from time import sleep
 
 import boto3
-
-from cloudlift.config import get_account_id, get_cluster_name, \
-    ServiceConfiguration, get_region_for_environment
+from cloudlift.config import (ServiceConfiguration, get_account_id,
+                              get_cluster_name, get_region_for_environment)
 from cloudlift.config.logging import log_bold, log_intent, log_warning
-from cloudlift.deployment import deployer, ServiceInformationFetcher
+from cloudlift.deployment import ServiceInformationFetcher, deployer
+from cloudlift.deployment.ecr import ECR
 from cloudlift.deployment.ecs import EcsClient
 from cloudlift.exceptions import UnrecoverableException
 from cloudlift.utils import chunks
-from cloudlift.deployment.ecr import ECR
 from stringcase import spinalcase
 
 DEPLOYMENT_COLORS = ['blue', 'magenta', 'white', 'cyan']
@@ -59,11 +58,10 @@ class ServiceUpdater(object):
         log_bold("Checking image in ECR")
         self.ecr.upload_artefacts()
         log_bold("Initiating deployment\n")
-        ecs_client = EcsClient(None, None, self.region)
 
         image_url = self.ecr.image_uri
         target = deployer.deploy_new_version
-        kwargs = dict(client=ecs_client, cluster_name=self.cluster_name,
+        kwargs = dict(cluster_name=self.cluster_name,
                       service_name=self.name, sample_env_file_path=self.env_sample_file,
                       timeout_seconds=self.timeout_seconds, env_name=self.environment,
                       ecr_image_uri=image_url,
@@ -73,8 +71,7 @@ class ServiceUpdater(object):
 
     def revert(self):
         target = deployer.revert_deployment
-        ecs_client = EcsClient(None, None, self.region)
-        kwargs = dict(client=ecs_client, cluster_name=self.cluster_name, timeout_seconds=self.timeout_seconds,
+        kwargs = dict(cluster_name=self.cluster_name, timeout_seconds=self.timeout_seconds,
                       deployment_identifier=self.deployment_identifier)
         self.run_job_for_all_services("Revert", target, kwargs)
 
