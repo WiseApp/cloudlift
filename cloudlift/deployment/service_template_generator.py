@@ -48,6 +48,10 @@ class ServiceTemplateGenerator(TemplateGenerator):
         PlacementStrategy(
             Type='spread',
             Field='attribute:ecs.availability-zone'
+        ),
+        PlacementStrategy(
+            Type='spread',
+            Field='instanceId'
         )]
 
     def __init__(self, service_configuration, environment_stack, env_sample_file, ecr_image_uri, desired_counts=None):
