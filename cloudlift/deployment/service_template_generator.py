@@ -6,6 +6,7 @@ from awacs.ecr import GetAuthorizationToken, BatchCheckLayerAvailability, GetDow
 from awacs.logs import CreateLogStream, PutLogEvents
 from awacs.secretsmanager import GetSecretValue
 from awacs.sts import AssumeRole
+from awacs.ssm import GetParameters
 from cfn_flip import to_yaml
 from stringcase import pascalcase
 from troposphere import GetAtt, Output, Parameter, Ref, Sub, Split, Select
@@ -560,7 +561,10 @@ service is down',
                                Statement(Effect=Allow,
                                          Action=[GetAuthorizationToken, BatchCheckLayerAvailability,
                                                  GetDownloadUrlForLayer, BatchGetImage, CreateLogStream, PutLogEvents],
-                                         Resource=["*"])
+                                         Resource=["*"]),
+                               Statement(Effect=Allow,
+                                         Action=[GetParameters],
+                                         Resource=[f"arn:aws:ssm:{self.region}:{self.account_id}:parameter/{self.env}/{service_name}/*"])
                            ]
                        ))]
         ))

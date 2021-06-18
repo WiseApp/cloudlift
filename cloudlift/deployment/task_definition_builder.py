@@ -76,10 +76,11 @@ class TaskDefinitionBuilder:
         log_config = self._gen_log_config()
         env_config = container_configurations[container_name(service_name)].get('environment', {})
         secrets_config = container_configurations[container_name(service_name)].get('secrets', {})
+        env_config.update(secrets_config)
 
         cd_kwargs = {
-            "Environment": [Environment(Name=name, Value=env_config[name]) for name in env_config],
-            "Secrets": [Secret(Name=name, ValueFrom=secrets_config[name]) for name in secrets_config],
+            # "Environment": [Environment(Name=name, Value=env_config[name]) for name in env_config],
+            "Secrets": [Secret(Name=name, ValueFrom=env_config[name]) for name in env_config],
             "Name": container_name(service_name),
             "Image": ecr_image_uri,
             "Essential": True,
@@ -199,7 +200,7 @@ class TaskDefinitionBuilder:
 
         return ContainerDefinition(
             Name=container_name(sidecar.get('name')),
-            Environment=[Environment(Name=k, Value=v) for (k, v) in env_config],
+            Secrets=[Secret(Name=k, ValueFrom=v) for (k,v) in env_config],
             MemoryReservation=int(sidecar.get('memory_reservation')),
             Image=sidecar.get('image'),
             LogConfiguration=log_config,

@@ -68,6 +68,44 @@ class ParameterStore(object):
                 break
         return environment_configs, sidecars_configs
 
+    def get_existing_config_paths(self):
+        ''' This returns complete path of parameter store keys for service secrets '''
+        environment_configs = {}
+        sidecars_configs = {}
+        next_token = None
+        while True:
+            if next_token:
+                response = self.client.get_parameters_by_path(
+                    Path=self.path_prefix,
+                    Recursive=False,
+                    WithDecryption=False,
+                    MaxResults=10,
+                    NextToken=next_token
+                )
+            else:
+                response = self.client.get_parameters_by_path(
+                    Path=self.path_prefix,
+                    Recursive=False,
+                    WithDecryption=False,
+                    MaxResults=10
+                )
+            for parameter in response['Parameters']:
+                parameter_name = parameter['Name'].split(self.path_prefix)[1]
+                if parameter_name.startswith('sidecars/'):
+                    sidecar_name, sidecar_parameter = parameter_name.replace('sidecars/', '', 1).split('/')
+                    if sidecar_name not in sidecars_configs:
+                        sidecars_configs[sidecar_name] = {}
+
+                    sidecars_configs[sidecar_name].update({sidecar_parameter: parameter['Name']})
+                else:
+                    environment_configs[parameter_name] = parameter['Name']
+
+            try:
+                next_token = response['NextToken']
+            except:
+                break
+        return environment_configs, sidecars_configs
+
     def set_config(self, differences, sidecar_name=None):
         self._validate_changes(differences)
         path_prefix = self.path_prefix if sidecar_name is None else '{}sidecars/{}/'.format(self.path_prefix,

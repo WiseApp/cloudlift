@@ -213,7 +213,7 @@ def _get_secrets_for_namespace(env_name, namespace, sample_env_folder_path, secr
 
 def _get_parameter_store_config(service_name, env_name):
     try:
-        environment_config, _ = ParameterStore(service_name, env_name).get_existing_config()
+        environment_config, _ = ParameterStore(service_name, env_name).get_existing_config_paths()
     except Exception as err:
         log_intent(str(err))
         ex_msg = f"Cannot find the configuration in parameter store [env: ${env_name} | service: ${service_name}]."
