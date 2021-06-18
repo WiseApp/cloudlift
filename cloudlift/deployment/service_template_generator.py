@@ -29,6 +29,7 @@ from troposphere.elasticloadbalancingv2 import (Matcher, RedirectConfig,
                                                 TargetGroupAttribute)
 from troposphere.elasticloadbalancingv2 import SubnetMapping
 from troposphere.iam import Role, Policy
+from troposphere import Tags
 
 from cloudlift.config import DecimalEncoder
 from cloudlift.config import get_account_id
@@ -54,13 +55,14 @@ class ServiceTemplateGenerator(TemplateGenerator):
             Field='instanceId'
         )]
 
-    def __init__(self, service_configuration, environment_stack, env_sample_file, ecr_image_uri, desired_counts=None):
+    def __init__(self, service_configuration, environment_stack, env_sample_file, ecr_image_uri, desired_counts=None,deployment_identifier=None):
         super(ServiceTemplateGenerator, self).__init__(service_configuration.environment)
         self._derive_configuration(service_configuration)
         self.env_sample_file_path = env_sample_file
         self.environment_stack = environment_stack
         self.ecr_image_uri = ecr_image_uri
         self.desired_counts = desired_counts or {}
+        self.deployment_identifier = deployment_identifier
 
     def _derive_configuration(self, service_configuration):
         self.application_name = service_configuration.service_name
@@ -239,6 +241,7 @@ service is down',
             ecr_image_uri=self.ecr_image_uri,
             fallback_task_role=Ref(task_role),
             fallback_task_execution_role=Ref(task_execution_role),
+            deployment_identifier=self.deployment_identifier
         )
 
         self.template.add_resource(td)
@@ -279,6 +282,8 @@ service is down',
                 TaskDefinition=Ref(td),
                 DesiredCount=desired_count,
                 LaunchType=launch_type,
+                Tags=Tags(environment=self.env, service=service_name),
+                PropagateTags="TASK_DEFINITION",
                 **launch_type_svc,
             )
             self.template.add_output(
@@ -360,6 +365,8 @@ service is down',
                 DesiredCount=desired_count,
                 DeploymentConfiguration=deployment_configuration,
                 LaunchType=launch_type,
+                Tags=Tags(environment=self.env, service=service_name),
+                PropagateTags="TASK_DEFINITION",
                 **launch_type_svc,
             )
             if autoscaling_config:
@@ -407,6 +414,8 @@ service is down',
                 DesiredCount=desired_count,
                 LaunchType=launch_type,
                 PlacementStrategies=self.PLACEMENT_STRATEGIES,
+                Tags=Tags(environment=self.env, service=service_name),
+                PropagateTags="TASK_DEFINITION",
                 **launch_type_svc
             )
             self.template.add_output(
@@ -454,6 +463,8 @@ service is down',
                 DesiredCount=desired_count,
                 DeploymentConfiguration=deployment_configuration,
                 LaunchType=launch_type,
+                Tags=Tags(environment=self.env, service=service_name),
+                PropagateTags="TASK_DEFINITION",
                 **launch_type_svc
             )
             self.template.add_output(
@@ -593,6 +604,11 @@ service is down',
             Protocol="HTTP",
             Matcher=Matcher(HttpCode="200-399"),
             Port=int(config['http_interface']['container_port']),
+            Tags=[
+                {'Key': 'service', 'Value': service_name},
+                {'Key': 'environment', 'Value': self.env},
+                {'Key': 'Name', 'Value': "{self.env}-{service_name}-tg".format(**locals())}
+            ],
             **target_group_config
         )
 
@@ -634,6 +650,11 @@ service is down',
                 )
             ],
             VpcId=Ref(self.vpc),
+            Tags=[
+                {'Key': 'service', 'Value': service_name},
+                {'Key': 'environment', 'Value': self.env},
+                {'Key': 'Name', 'Value': "{self.env}-{service_name}-tg".format(**locals())}
+            ]
             **target_group_config
         )
 

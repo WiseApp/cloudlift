@@ -110,6 +110,7 @@ class ServiceCreator(object):
         try:
             current_image_uri = information_fetcher.get_current_image_uri()
             desired_counts = information_fetcher.fetch_current_desired_count()
+            current_deployment_identifier = information_fetcher.get_current_deployment_identifier()
 
             template_generator = ServiceTemplateGenerator(
                 self.service_configuration,
@@ -117,6 +118,7 @@ class ServiceCreator(object):
                 self.env_sample_file,
                 current_image_uri,
                 desired_counts,
+                current_deployment_identifier
             )
             service_template_body = template_generator.generate_service()
             change_set = create_change_set(

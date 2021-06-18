@@ -94,13 +94,14 @@ def create_new_task_definition(color, ecr_image_uri, ecs_service_name, env_name,
         ecr_image_uri=ecr_image_uri,
         fallback_task_role=task_definition.role_arn,
         fallback_task_execution_role=task_definition.execution_role_arn,
+        deployment_identifier=deployment_identifier
     ))
     diff = DeepDiff(task_definition, updated_task_definition)
     diff.pop('dictionary_item_removed', 'no dictionary_item_removed')
 
     if diff:
         log_with_color(f"{ecs_service_name} task definition diffs: {pformat(diff)}", color)
-    return deployment.update_task_definition(updated_task_definition, deployment_identifier)
+    return deployment.update_task_definition(updated_task_definition)
 
 
 def deploy_and_wait(deployment, new_task_definition, color, timeout_seconds):

@@ -18,6 +18,7 @@ from troposphere.logs import LogGroup
 from troposphere.policies import (AutoScalingRollingUpdate, CreationPolicy,
                                   ResourceSignal)
 from troposphere.rds import DBSubnetGroup
+from troposphere import Tags
 
 from cloudlift.config import DecimalEncoder
 from cloudlift.config import get_client_for, get_region_for_environment
@@ -329,7 +330,11 @@ class ClusterTemplateGenerator(TemplateGenerator):
         return instance_profile
 
     def _add_cluster(self):
-        cluster = Cluster('Cluster', ClusterName=Ref('AWS::StackName'))
+        cluster = Cluster(
+            'Cluster',
+            ClusterName=Ref('AWS::StackName'),
+            Tags=Tags(environment=self.env)
+            )
         self.template.add_resource(cluster)
         self._add_ec2_auto_scaling()
         self._add_cluster_alarms(cluster)

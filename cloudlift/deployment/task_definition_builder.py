@@ -1,4 +1,5 @@
 from troposphere import Template
+from troposphere import Tags
 from troposphere.ecs import (ContainerDefinition,
                              Environment, Secret,
                              LogConfiguration,
@@ -23,6 +24,7 @@ class TaskDefinitionBuilder:
                               ecr_image_uri,
                               fallback_task_role,
                               fallback_task_execution_role,
+                              deployment_identifier
                               ):
         t = Template()
         t.add_resource(self.build_cloudformation_resource(
@@ -30,6 +32,7 @@ class TaskDefinitionBuilder:
             ecr_image_uri=ecr_image_uri,
             fallback_task_role=fallback_task_role,
             fallback_task_execution_role=fallback_task_execution_role,
+            deployment_identifier=deployment_identifier
         ))
         task_definition = t.to_dict()["Resources"][self._resource_name(self.service_name)]["Properties"]
         return _cloudformation_to_boto3_payload(task_definition, ignore_keys={'Options', 'DockerLabels'})
@@ -40,6 +43,7 @@ class TaskDefinitionBuilder:
             ecr_image_uri,
             fallback_task_role,
             fallback_task_execution_role,
+            deployment_identifier=None
     ):
         environment = self.environment
         service_name = self.service_name
@@ -60,6 +64,11 @@ class TaskDefinitionBuilder:
         td_kwargs['ExecutionRoleArn'] = config.get('task_execution_role_arn') \
             if 'task_execution_role_arn' in config \
             else fallback_task_execution_role
+
+        tags = Tags(environment=self.environment,service=self.service_name)
+        if deployment_identifier:
+            tags += Tags(deployment_identifier=deployment_identifier)
+        td_kwargs['Tags'] = tags
 
         if ('udp_interface' in config) or ('tcp_interface' in config):
             td_kwargs['NetworkMode'] = 'awsvpc'

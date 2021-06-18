@@ -120,7 +120,7 @@ def edit_config(name, environment, sidecar):
 @cli.command()
 @_require_environment
 @_require_name
-@click.option('--deployment_identifier', type=str, required=True,
+@click.option('--deployment_identifier', type=str, required=False,
               help='Unique identifier for deployment which can be used for reverting')
 @click.option('--timeout_seconds', default=600, help='The deployment timeout')
 @click.option('--version', default=None,

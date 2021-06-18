@@ -139,3 +139,36 @@ class ServiceInformationFetcher(object):
         except Exception:
             raise UnrecoverableException("Could not find existing services.")
         return desired_counts
+
+    def get_current_deployment_identifier(self):
+        ecs_client = get_client_for('ecs', self.environment)
+        if len(self.service_info) < 1:
+            return None
+
+        logical_service_name = next(iter(self.service_info))
+        ecs_service_name = self.service_info[logical_service_name].get('ecs_service_name')
+        task_arns = ecs_client.list_tasks(
+            cluster=self.cluster_name,
+            serviceName=ecs_service_name
+        )['taskArns']
+
+        if len(task_arns) < 1:
+            return None
+
+        tasks = ecs_client.describe_tasks(
+            cluster=self.cluster_name,
+            tasks=task_arns
+        )['tasks']
+
+        if len(tasks) < 1:
+            return None
+
+        task_definition_arns = tasks[0]['taskDefinitionArn']
+        task_definition = ecs_client.describe_task_definition(
+            taskDefinition=task_definition_arns,
+            include=[
+                'TAGS',
+            ]
+        )
+
+        return next((tagDict['value'] for tagDict in task_definition['tags'] if tagDict['key'] == 'deployment_identifier'), None)

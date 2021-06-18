@@ -390,16 +390,8 @@ class EcsAction(object):
         )
         return task_definition
 
-    def update_task_definition(self, task_definition, deployment_identifier):
-        tags = [
-            {
-                'key': 'deployment_identifier',
-                'value': deployment_identifier
-            },
-        ] if deployment_identifier is not None else []
-
+    def update_task_definition(self, task_definition):
         response = self._client.register_task_definition(
-            tags=tags,
             **task_definition
         )
         new_task_definition = EcsTaskDefinition(response[u'taskDefinition'])
