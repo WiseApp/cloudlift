@@ -13,11 +13,12 @@ HARD_LIMIT_MEMORY_IN_MB = 20480
 
 
 class TaskDefinitionBuilder:
-    def __init__(self, environment, service_name, configuration, region):
+    def __init__(self, environment, service_name, configuration, region, application_name):
         self.environment = environment
         self.service_name = service_name
         self.configuration = configuration
         self.region = region
+        self.application_name = application_name
 
     def build_task_definition(self,
                               container_configurations,
@@ -65,7 +66,7 @@ class TaskDefinitionBuilder:
             if 'task_execution_role_arn' in config \
             else fallback_task_execution_role
 
-        tags = Tags(environment=self.environment,service=self.service_name)
+        tags = Tags(environment=self.environment,application=self.application_name,service=self.service_name)
         if deployment_identifier:
             tags += Tags(deployment_identifier=deployment_identifier)
         td_kwargs['Tags'] = tags

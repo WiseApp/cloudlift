@@ -235,6 +235,7 @@ service is down',
             service_name=service_name,
             configuration=config,
             region=self.region,
+            application_name=self.application_name
         )
 
         td = builder.build_cloudformation_resource(
@@ -283,7 +284,7 @@ service is down',
                 TaskDefinition=Ref(td),
                 DesiredCount=desired_count,
                 LaunchType=launch_type,
-                Tags=Tags(environment=self.env, service=service_name),
+                Tags=Tags(environment=self.env, application=self.application_name, service=service_name),
                 PropagateTags="TASK_DEFINITION",
                 **launch_type_svc,
             )
@@ -366,7 +367,7 @@ service is down',
                 DesiredCount=desired_count,
                 DeploymentConfiguration=deployment_configuration,
                 LaunchType=launch_type,
-                Tags=Tags(environment=self.env, service=service_name),
+                Tags=Tags(environment=self.env, application=self.application_name, service=service_name),
                 PropagateTags="TASK_DEFINITION",
                 **launch_type_svc,
             )
@@ -415,7 +416,7 @@ service is down',
                 DesiredCount=desired_count,
                 LaunchType=launch_type,
                 PlacementStrategies=self.PLACEMENT_STRATEGIES,
-                Tags=Tags(environment=self.env, service=service_name),
+                Tags=Tags(environment=self.env, application=self.application_name, service=service_name),
                 PropagateTags="TASK_DEFINITION",
                 **launch_type_svc
             )
@@ -464,7 +465,7 @@ service is down',
                 DesiredCount=desired_count,
                 DeploymentConfiguration=deployment_configuration,
                 LaunchType=launch_type,
-                Tags=Tags(environment=self.env, service=service_name),
+                Tags=Tags(environment=self.env, application=self.application_name, service=service_name),
                 PropagateTags="TASK_DEFINITION",
                 **launch_type_svc
             )
@@ -564,7 +565,7 @@ service is down',
                                          Resource=["*"]),
                                Statement(Effect=Allow,
                                          Action=[GetParameters],
-                                         Resource=[f"arn:aws:ssm:{self.region}:{self.account_id}:parameter/{self.env}/{service_name}/*"])
+                                         Resource=[f"arn:aws:ssm:{self.region}:{self.account_id}:parameter/{self.env}/{self.application_name}/*"])
                            ]
                        ))]
         ))
@@ -608,11 +609,7 @@ service is down',
             Protocol="HTTP",
             Matcher=Matcher(HttpCode="200-399"),
             Port=int(config['http_interface']['container_port']),
-            Tags=[
-                {'Key': 'service', 'Value': service_name},
-                {'Key': 'environment', 'Value': self.env},
-                {'Key': 'Name', 'Value': "{self.env}-{service_name}-tg".format(**locals())}
-            ],
+            Tags=Tags(environment=self.env, application=self.application_name, service=service_name),
             **target_group_config
         )
 
@@ -655,9 +652,9 @@ service is down',
             ],
             VpcId=Ref(self.vpc),
             Tags=[
-                {'Key': 'service', 'Value': service_name},
+                {'Key': 'service', 'Value': f"{self.application_name}-{service_name}"},
                 {'Key': 'environment', 'Value': self.env},
-                {'Key': 'Name', 'Value': "{self.env}-{service_name}-tg".format(**locals())}
+                {'Key': 'Name', 'Value': "{self.env}-{self.application_name}-{service_name}-tg".format(**locals())}
             ]
             **target_group_config
         )
