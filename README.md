@@ -1,20 +1,6 @@
 # Cloudlift
 
-Cloudlift is built by Simpl developers to make it easier to launch dockerized
-services in AWS ECS.
-
-Cloudlift is a command-line tool for dockerized services to be deployed in AWS
-ECS. It's very simple to use. That's possible because this is heavily
-opinionated. Under the hood, it is a wrapper to AWS cloudformation templates. On
-creating/udpating a service or a cluster this creates/updates a cloudformation
-in AWS.
-
-## Demo videos
-
-- [Create Environment](https://asciinema.org/a/evsaZvW86qff0InxNlzLPMtb6)
-- [Create Service](https://asciinema.org/a/RaZb81VDmrnWg8qckWKAm98Bn)
-- [Deploy Service with image build](https://asciinema.org/a/j4A2DBjLPadbwJPvwiT6W1c2N)
-- [Deploy Service](https://asciinema.org/a/FUUJ3U2gm7U1yCcTCGjTiGBbp)
+Simple to use, heavily opinionated cli for running dockerized services deployed in AWS ECS.
 
 ## Installing cloudlift
 
@@ -26,10 +12,10 @@ in AWS.
 curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py | python get-pip.py
 ```
 
-### 2. Download and Install cloudlift
+### Download and Install cloudlift
 
 ```sh
-git clone git@github.com:GetSimpl/cloudlift.git
+git clone git@github.com:jeechu/cloudlift.git
 cd cloudlift
 ./install-cloudlift.sh
 ```
@@ -42,7 +28,7 @@ aws configure
 
 Enter the AWS Access Key ID, AWS Secret Access Key. You can find instructions
 here on how to get Access Key ID and Secret Access Key here at
-http://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html
+[AWS Docs](http://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html)
 
 #### Using AWS Profiles
 
@@ -321,7 +307,9 @@ For example, you can pass your SSH key as a build argument to docker build
 ```sh
   cloudlift deploy_service --build-arg SSH_KEY "\"`cat ~/.ssh/id_rsa`\"" -e <environment-name>
 ```
+
 This example is bit comprehensive to show
+
 - it can execute shell commands with "`".
 - It's wrapped with double quotes to avoid line-breaks in SSH keys breaking the command.
 
@@ -345,7 +333,7 @@ the MFA code.
 
 To ensure the tests use the development version and not the installed version run (refer [here](https://stackoverflow.com/a/20972950/227705))
 
-```
+```sh
 pip install -e .
 ```
 
