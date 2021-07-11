@@ -233,13 +233,13 @@ class ServiceConfiguration(DynamodbConfig):
                             "minimum": 2,
                             "maximum": 120
                         },
-                    },
-                    "load_balancing_algorithm": {
-                        "type": "string",
-                        "enum": ["round_robin", "least_outstanding_requests"]
-                    },
-                    "deregistration_delay": {
-                        "type": "number"
+                        "load_balancing_algorithm": {
+                            "type": "string",
+                            "enum": ["round_robin", "least_outstanding_requests"]
+                        },
+                        "deregistration_delay": {
+                            "type": "number"
+                        }
                     },
                     "required": [
                         "internal",
@@ -507,7 +507,7 @@ class ServiceConfiguration(DynamodbConfig):
                         u'container_port': 80,
                         u'health_check_path': u'/elb-check',
                         u'load_balancing_algorithm': DEFAULT_LOAD_BALANCING_ALGORITHM,
-                        u'deregistartion_delay': DEFAULT_TARGET_GROUP_DEREGISTRATION_DELAY
+                        u'deregistration_delay': DEFAULT_TARGET_GROUP_DEREGISTRATION_DELAY
                     },
                     u'secrets_name': spinalcase("{}-{}".format(self.service_name, self.environment)),
                     u'system_controls': [],
