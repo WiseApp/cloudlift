@@ -3,6 +3,7 @@ from time import sleep, time
 from cloudlift.exceptions import UnrecoverableException
 from colorclass import Color
 from terminaltables import SingleTable
+from cloudlift.deployment.ecs import EcsClient
 
 from cloudlift.config import ParameterStore
 from cloudlift.deployment.ecs import DeployAction
@@ -20,9 +21,10 @@ def find_essential_container(container_definitions):
     raise UnrecoverableException('no essential containers found')
 
 
-def deploy_new_version(client, cluster_name, ecs_service_name,
+def deploy_new_version(region, cluster_name, ecs_service_name,
                        deploy_version_tag, service_name, sample_env_file_path,
                        timeout_seconds, env_name, color='white', complete_image_uri=None):
+    client = EcsClient(None, None, region)
     log_bold("Starting to deploy " + ecs_service_name)
     deployment = DeployAction(client, cluster_name, ecs_service_name)
     if deployment.service.desired_count == 0:

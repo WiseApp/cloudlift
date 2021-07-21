@@ -58,7 +58,7 @@ class ServiceUpdater(object):
             process = multiprocessing.Process(
                 target=deployer.deploy_new_version,
                 args=(
-                    ecs_client,
+                    self.region,
                     self.cluster_name,
                     service_name,
                     self.version,
