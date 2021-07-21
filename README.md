@@ -1,5 +1,15 @@
 # Cloudlift
 
+--------------------
+
+Fork by WISE:
+This version has cloudlift version frozen on branch "primary", tag: v1.11.0.
+This is branched out from git sha 638de4c3f4aa4fdbd69afffc8ee2a1b1cdc5b266 (v1.10.0) of Rippling fork of Cloudlift, followed by pickle fixes for Python 3.7+.
+
+This is frozen because it is risky to use Rippling fork master due to the active development going on.
+
+--------------------
+
 Simple to use, heavily opinionated cli for running dockerized services deployed in AWS ECS.
 
 ## Installing cloudlift
